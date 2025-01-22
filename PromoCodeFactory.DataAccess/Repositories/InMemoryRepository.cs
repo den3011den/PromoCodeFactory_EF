@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
 using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain;
+using PromoCodeFactory.DataAccess.Data;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace PromoCodeFactory.DataAccess.Repositories
 {
@@ -11,21 +12,82 @@ namespace PromoCodeFactory.DataAccess.Repositories
         : IRepository<T>
         where T : BaseEntity
     {
+
+        private readonly ApplicationDbContext _db;
+        private readonly DbSet<T> _entitySet;
+
         protected IEnumerable<T> Data { get; set; }
 
-        public InMemoryRepository(IEnumerable<T> data)
+        public InMemoryRepository(ApplicationDbContext db)
         {
-            Data = data;
+            _db = db;
+            _entitySet = _db.Set<T>();
         }
 
-        public Task<IEnumerable<T>> GetAllAsync()
+
+        /// <summary>
+        /// Запросить все сущности в базе.
+        /// </summary>
+        /// <param name="cancellationToken"> Токен отмены </param>
+        /// <param name="asNoTracking"> Вызвать с AsNoTracking. </param>
+        /// <returns> Список сущностей. </returns>
+        public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return Task.FromResult(Data);
+            return await _entitySet.ToListAsync();
         }
 
-        public Task<T> GetByIdAsync(Guid id)
+
+        /// <summary>
+        /// Получить сущность по Id.
+        /// </summary>
+        /// <param name="id"> Id сущности. </param>
+        /// <param name="cancellationToken"></param>
+        /// <returns> Cущность. </returns>
+        public virtual async Task<T> GetByIdAsync(Guid id)
         {
-            return Task.FromResult(Data.FirstOrDefault(x => x.Id == id));
+            return await _entitySet.FindAsync(id);
         }
+
+
+        /// <summary>
+        /// Добавить в базу одну сущность.
+        /// </summary>
+        /// <param name="entity"> Сущность для добавления. </param>
+        /// <returns> Добавленная сущность. </returns>
+        public virtual async Task<T> AddAsync(T entity)
+        {
+            var returnEntity = (await _entitySet.AddAsync(entity));
+            await _db.SaveChangesAsync();
+            return returnEntity.Entity;
+        }
+
+        /// <summary>
+        /// Для сущности проставить состояние - что она изменена.
+        /// </summary>
+        /// <param name="entity"> Сущность для изменения. </param>
+        public virtual async Task UpdateAsync(T entity)
+        {
+            _db.Entry(entity).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
+        }
+
+
+        /// <summary>
+        /// Удалить сущность.
+        /// </summary>
+        /// <param name="id"> Id удалённой сущности. </param>
+        /// <returns> Была ли сущность удалена. </returns>
+        public virtual async Task<bool> DeleteAsync(Guid id)
+        {
+            var obj = _entitySet.Find(id);
+            if (obj == null)
+            {
+                return false;
+            }
+            _entitySet.Remove(obj);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
     }
 }
