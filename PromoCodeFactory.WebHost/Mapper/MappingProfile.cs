@@ -41,7 +41,7 @@ namespace DictionaryManagement_Business.Mapper
             CreateMap<GivePromoCodeRequest, PromoCode>().ReverseMap();
 
             CreateMap<Customer, CreateOrEditCustomerRequest>()
-                .ForMember(dest => dest.PreferenceIds, opt => opt.MapFrom(src => src.Preferences.Select(x => x.Id).ToList()));
+                .ForMember(dest => dest.PreferenceIds, opt => opt.MapFrom(src => src.CustomerPreferences.Select(x => x.PreferenceId).ToList()));
         }
     }
 }
