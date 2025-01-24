@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace PromoCodeFactory.DataAccess.Repositories
 {
-    public class InMemoryRepository<T>
+    public class Repository<T>
         : IRepository<T>
         where T : BaseEntity
     {
 
-        private readonly ApplicationDbContext _db;
+        protected readonly ApplicationDbContext _db;
         private readonly DbSet<T> _entitySet;
 
         protected IEnumerable<T> Data { get; set; }
 
-        public InMemoryRepository(ApplicationDbContext db)
+        public Repository(ApplicationDbContext db)
         {
             _db = db;
             _entitySet = _db.Set<T>();
@@ -28,8 +28,6 @@ namespace PromoCodeFactory.DataAccess.Repositories
         /// <summary>
         /// Запросить все сущности в базе.
         /// </summary>
-        /// <param name="cancellationToken"> Токен отмены </param>
-        /// <param name="asNoTracking"> Вызвать с AsNoTracking. </param>
         /// <returns> Список сущностей. </returns>
         public async Task<IEnumerable<T>> GetAllAsync()
         {
@@ -40,8 +38,7 @@ namespace PromoCodeFactory.DataAccess.Repositories
         /// <summary>
         /// Получить сущность по Id.
         /// </summary>
-        /// <param name="id"> Id сущности. </param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="id"> Id сущности. </param>        
         /// <returns> Cущность. </returns>
         public virtual async Task<T> GetByIdAsync(Guid id)
         {

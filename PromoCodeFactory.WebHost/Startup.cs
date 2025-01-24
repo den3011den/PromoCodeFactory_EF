@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.DataAccess.Data;
+using PromoCodeFactory.DataAccess.Repositories;
 using System;
 using System.IO;
 
@@ -29,8 +31,9 @@ namespace PromoCodeFactory.WebHost
             services.AddControllers();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            //services.AddScoped(typeof(IRepository<Employee>), (x) =>
-            //    new InMemoryRepository<Employee>(FakeDataFactory.Employees));
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<IPromoCodeRepository, PromoCodeRepository>();
+
             //services.AddScoped(typeof(IRepository<Role>), (x) =>
             //    new InMemoryRepository<Role>(FakeDataFactory.Roles));
             //services.AddScoped(typeof(IRepository<Preference>), (x) =>
