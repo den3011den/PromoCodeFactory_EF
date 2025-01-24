@@ -33,6 +33,8 @@ namespace PromoCodeFactory.WebHost
 
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<IPromoCodeRepository, PromoCodeRepository>();
+            services.AddScoped<IPreferenceRepository, PreferenceRepository>();
+            services.AddScoped<ICustomerPreferenceRepository, CustomerPreferenceRepository>();
 
             //services.AddScoped(typeof(IRepository<Role>), (x) =>
             //    new InMemoryRepository<Role>(FakeDataFactory.Roles));

@@ -1,4 +1,5 @@
-﻿using PromoCodeFactory.Core.Abstractions.Repositories;
+﻿using Microsoft.EntityFrameworkCore;
+using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.DataAccess.Data;
 using System;
@@ -25,6 +26,12 @@ namespace PromoCodeFactory.DataAccess.Repositories
             }
 
             return false;
+        }
+
+        public async Task<Customer> FindByFirstnameAndLastnameAsync(string Firstname, string Lastname)
+        {
+            return await _db.Customer.FirstOrDefaultAsync(u => u.FirstName.Trim().ToLower() == Firstname.Trim().ToLower() && u.LastName.Trim().ToLower() == Lastname.Trim().ToLower());
+
         }
 
     }
