@@ -1,10 +1,9 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.WebHost.Models;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PromoCodeFactory.WebHost.Controllers
@@ -21,15 +20,13 @@ namespace PromoCodeFactory.WebHost.Controllers
         private readonly ICustomerRepository _customerRepository;
         private readonly IPreferenceRepository _preferenceRepository;
         private readonly ICustomerPreferenceRepository _customerPreferenceRepository;
-        private readonly IMapper _mapper;
 
         public CustomersController(ICustomerRepository customerRepository, IPreferenceRepository preferenceRepository,
-                ICustomerPreferenceRepository customerPreferenceRepository, IMapper mapper)
+                ICustomerPreferenceRepository customerPreferenceRepository)
         {
             _customerRepository = customerRepository;
             _preferenceRepository = preferenceRepository;
             _customerPreferenceRepository = customerPreferenceRepository;
-            _mapper = mapper;
         }
 
         [HttpGet]
@@ -39,8 +36,18 @@ namespace PromoCodeFactory.WebHost.Controllers
 
             try
             {
-                var customerList = (await _customerRepository.GetAllAsync());
-                return Ok(_mapper.Map<IEnumerable<Customer>, IEnumerable<CustomerShortResponse>>(customerList));
+                var customerList = (await _customerRepository.GetAllAsync()).ToList();
+
+                var customerShortResponseList = customerList.Select(u =>
+                        new CustomerShortResponse()
+                        {
+                            Id = u.Id,
+                            FirstName = u.FirstName,
+                            LastName = u.LastName,
+                            Email = u.Email
+                        }).ToList();
+
+                return Ok(customerShortResponseList);
             }
             catch (Exception ex)
             {
@@ -55,13 +62,35 @@ namespace PromoCodeFactory.WebHost.Controllers
             try
             {
                 var customer = (await _customerRepository.GetByIdAsync(id));
-                return Ok(_mapper.Map<Customer, CustomerResponse>(customer));
+                return Ok(
+                    new CustomerResponse()
+                    {
+                        Id = customer.Id,
+                        FirstName = customer.FirstName,
+                        LastName = customer.LastName,
+                        Email = customer.Email,
+                        Preferences = customer.CustomerPreferences.Select(u =>
+                            new PreferenceResponse()
+                            {
+                                Id = u.Id,
+                                Name = u.Preference.Name
+                            }).ToList(),
+                        PromoCodes = customer.PromoCodes.Select(u =>
+                            new PromoCodeShortResponse
+                            {
+                                Id = u.Id,
+                                Code = u.Code,
+                                ServiceInfo = u.ServiceInfo,
+                                BeginDate = u.ToString(),
+                                EndDate = u.EndDate.ToString(),
+                                PartnerName = u.PartnerName
+                            }).ToList()
+                    });
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-
         }
 
         [HttpPost]

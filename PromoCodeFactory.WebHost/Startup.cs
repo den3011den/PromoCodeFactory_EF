@@ -7,7 +7,6 @@ using Microsoft.Extensions.Hosting;
 using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.DataAccess.Data;
 using PromoCodeFactory.DataAccess.Repositories;
-using System;
 using System.IO;
 
 namespace PromoCodeFactory.WebHost
@@ -29,7 +28,7 @@ namespace PromoCodeFactory.WebHost
                     .UseSqlite(configuration.GetConnectionString("ApplicationConnection")));
 
             services.AddControllers();
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            //services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<IPromoCodeRepository, PromoCodeRepository>();

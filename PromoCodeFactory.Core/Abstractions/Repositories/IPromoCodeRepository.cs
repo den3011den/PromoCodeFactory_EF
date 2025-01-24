@@ -13,6 +13,6 @@ namespace PromoCodeFactory.Core.Abstractions.Repositories
         /// <param name="id">Id клиента</param>
         /// <returns>Количество удалённых промокодов</returns>
         Task<int> DeletePromoCodesByCustomerIdAsync(Guid id);
-        Task<string> GivePromocodeToCustomerWithPreferenceAsync(PromoCode promoCode);
+        Task<PromoCode> GetByCodeAsync(string code);
     }
 }
