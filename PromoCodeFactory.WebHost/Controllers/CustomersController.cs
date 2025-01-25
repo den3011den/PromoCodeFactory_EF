@@ -110,20 +110,20 @@ namespace PromoCodeFactory.WebHost.Controllers
         /// <summary>
         /// Добавить нового клиента со списокм его предпочтений
         /// </summary>
-        /// <param name="id">GUID клиента</param>
+        /// <param name="request">Данные о новом клиенте - объект типа CreateOrEditCustomerRequest</param>
         /// <returns>Вернёт строку с информацией о выполненной операцией</returns>
-        /// <response code="201">Успешное выполнение. Клиент создан</response>
+        /// <response code="200">Успешное выполнение. Клиент создан</response>
         /// <response code="400">Не удалось найти одно из предпочтений клтиента в справочнике предпочтений</response>        
         [HttpPost]
-        [ProducesResponseType(typeof(Customer), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         [HttpPost]
-        public async Task<ActionResult<Customer>> CreateCustomerAsync(CreateOrEditCustomerRequest request)
+        public async Task<ActionResult<string>> CreateCustomerAsync(CreateOrEditCustomerRequest request)
         {
             var customerToAdd = new Customer { Id = Guid.NewGuid(), FirstName = request.FirstName, LastName = request.LastName, Email = request.Email };
             var customerAdded = await _customerRepository.AddAsync(customerToAdd);
 
-            /// далее добавляем связки клиента с предпочтениями 
+            // далее добавляем связки клиента с предпочтениями 
             if ((request.PreferenceIds != null) && (request.PreferenceIds.Count > 0))
             {
                 foreach (var pref in request.PreferenceIds)
@@ -143,9 +143,9 @@ namespace PromoCodeFactory.WebHost.Controllers
                     }
                 }
             }
-            var routVar = new UriBuilder(Request.Scheme, Request.Host.Host, (int)Request.Host.Port, Request.Path.Value).ToString() + "/" + customerAdded.Id.ToString();
-            var retVar = await _customerRepository.GetByIdAsync(customerAdded.Id);
-            return Created(routVar, retVar);
+            //var routVar = new UriBuilder(Request.Scheme, Request.Host.Host, (int)Request.Host.Port, Request.Path.Value).ToString() + "/" + customerAdded.Id.ToString();
+            //return Created(routVar, customerAdded);
+            return Ok("Добавлен клиент с Id " + customerAdded.Id.ToString());
         }
 
 
