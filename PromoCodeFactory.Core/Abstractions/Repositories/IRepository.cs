@@ -5,6 +5,11 @@ using System.Threading.Tasks;
 
 namespace PromoCodeFactory.Core.Abstractions.Repositories
 {
+
+    /// <summary>
+    /// Интрефейс сервиса основнымх операций по работе с сущностями БД
+    /// </summary>
+    /// <typeparam name="T">Сущность БД</typeparam>
     public interface IRepository<T>
         where T : BaseEntity
     {

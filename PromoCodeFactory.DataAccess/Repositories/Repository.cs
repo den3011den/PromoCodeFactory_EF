@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace PromoCodeFactory.DataAccess.Repositories
 {
+
+    /// <summary>
+    /// Реализация интрефейса сервиса основнымх операций по работе с сущностями БД
+    /// </summary>
+    /// <typeparam name="T">Сущность БД</typeparam>
     public class Repository<T>
         : IRepository<T>
         where T : BaseEntity
@@ -23,6 +28,7 @@ namespace PromoCodeFactory.DataAccess.Repositories
             _db = db;
             _entitySet = _db.Set<T>();
         }
+
 
 
         /// <summary>

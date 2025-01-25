@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace PromoCodeFactory.DataAccess.Repositories
 {
+    /// <summary>
+    /// Реализация интерфейса сервиса работы с промокодами
+    /// </summary>
     public class PromoCodeRepository : Repository<PromoCode>, IPromoCodeRepository
     {
 
@@ -16,7 +19,7 @@ namespace PromoCodeFactory.DataAccess.Repositories
         }
 
         /// <summary>
-        /// Удаляет промокоды выданые клиенту
+        /// Удаляет промокоды выданые клиенту по Id клиента
         /// </summary>
         /// <param name="id">Id клиента</param>
         /// <returns>Количество удалённых промокодов</returns>
@@ -36,6 +39,11 @@ namespace PromoCodeFactory.DataAccess.Repositories
             return counter;
         }
 
+        /// <summary>
+        /// Найти и вернуть объект PromoCode по коду (поле PromoCode.Code)
+        /// </summary>
+        /// <param name="code">Код промокода</param>
+        /// <returns>Вернёт найденый по коду (поле PromoCode.Code) промокод (объект типа PromoCode) </returns>
         public async Task<PromoCode> GetByCodeAsync(string code)
         {
             return await _db.PromoCode.FirstOrDefaultAsync(u => u.Code.Trim().ToUpper() == code.Trim().ToUpper());
