@@ -3,6 +3,7 @@ using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.WebHost.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace PromoCodeFactory.WebHost.Controllers
@@ -27,6 +28,7 @@ namespace PromoCodeFactory.WebHost.Controllers
         /// <returns>Возвращает список всех предпочтений - объекты типа PreferenceResponse</returns>
         /// <response code="200">Успешное выполнение</response>
         [HttpGet]
+        [ProducesResponseType(typeof(List<PreferenceResponse>), (int)HttpStatusCode.OK)]
         public async Task<IEnumerable<PreferenceResponse>> GetPreferenceAsync()
         {
             var preferences = await _preferenceRepository.GetAllAsync();

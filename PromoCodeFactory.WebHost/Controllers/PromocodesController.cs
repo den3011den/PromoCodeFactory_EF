@@ -5,6 +5,7 @@ using PromoCodeFactory.WebHost.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace PromoCodeFactory.WebHost.Controllers
@@ -33,13 +34,14 @@ namespace PromoCodeFactory.WebHost.Controllers
         }
 
         /// <summary>
-        /// Получить все промокоды
+        /// Получить список всех промокодов
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Возвращает список промокодов - объекты типа PromoCodeShortResponse</returns>
+        /// <response code="200">Успешное выполнение</response>
         [HttpGet]
+        [ProducesResponseType(typeof(List<PromoCodeShortResponse>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IEnumerable<PromoCodeShortResponse>>> GetPromocodesAsync()
         {
-            //TODO: Получить все промокоды 
             var promocodeList = await _promoCodeRepository.GetAllAsync();
 
             var promoCodeShortResponseList = promocodeList.Select(u =>
@@ -56,11 +58,19 @@ namespace PromoCodeFactory.WebHost.Controllers
             return Ok(promoCodeShortResponseList);
         }
 
+
         /// <summary>
-        /// Создать промокод и выдать его клиентам с указанным предпочтением
+        /// Добавить промокод и выдать его клиенту с указанным предпочтением
         /// </summary>
-        /// <returns></returns>
+        /// <param name="request">Данные добавляемого промокода - объект типа GivePromoCodeRequest </param>
+        /// <returns>Строка о результатах выполенной операции</returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">Промокод уже существует, не найдено предпочтение в справочнике предпочтений, не найден партнёр в спраочнике сотрудников,
+        /// нет клиента клиента с заявленным предпочтением. Подробнее - в строке ответа о выполении операции        
+        /// </response>
         [HttpPost]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GivePromoCodesToCustomersWithPreferenceAsync(GivePromoCodeRequest request)
         {
             //TODO: Создать промокод и выдать его клиентам с указанным предпочтением
