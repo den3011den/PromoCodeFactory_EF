@@ -3,6 +3,7 @@ using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.WebHost.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace PromoCodeFactory.WebHost.Controllers
@@ -22,10 +23,12 @@ namespace PromoCodeFactory.WebHost.Controllers
         }
 
         /// <summary>
-        /// Получить все доступные роли сотрудников
+        /// Получить список всех ролей
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Возвращает список всех ролей</returns>
+        /// <response code="200">Успешное выполнение</response>
         [HttpGet]
+        [ProducesResponseType(typeof(List<RoleItemResponse>), (int)HttpStatusCode.OK)]
         public async Task<IEnumerable<RoleItemResponse>> GetRolesAsync()
         {
             var roles = await _rolesRepository.GetAllAsync();
