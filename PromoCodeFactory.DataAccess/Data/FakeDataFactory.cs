@@ -6,8 +6,16 @@ using System.Linq;
 
 namespace PromoCodeFactory.DataAccess.Data
 {
+
+    /// <summary>
+    /// Класс с данными для предзаполения БД
+    /// </summary>
     public static class FakeDataFactory
     {
+
+        /// <summary>
+        /// Данные для предзаполнения сущностей Сотрудник
+        /// </summary>
         public static IEnumerable<Employee> Employees => new List<Employee>()
         {
             new Employee()
@@ -52,6 +60,10 @@ namespace PromoCodeFactory.DataAccess.Data
             },
         };
 
+
+        /// <summary>
+        /// Данные для предзаполнения сущностей Роль        
+        /// </summary>
         public static IEnumerable<Role> Roles => new List<Role>()
         {
             new Role()
@@ -68,6 +80,9 @@ namespace PromoCodeFactory.DataAccess.Data
             }
         };
 
+        /// <summary>
+        /// Данные для предзаполнения сущностей Предпочтение
+        /// </summary>
         public static IEnumerable<Preference> Preferences => new List<Preference>()
         {
             new Preference()
@@ -87,6 +102,9 @@ namespace PromoCodeFactory.DataAccess.Data
             }
         };
 
+        /// <summary>
+        /// Данные для предзаполнения сущностей Связка сущностей Клиент и Предпочтение
+        /// </summary>
         public static IEnumerable<CustomerPreference> CustomerPreferences
         {
             get
@@ -139,7 +157,9 @@ namespace PromoCodeFactory.DataAccess.Data
         }
 
 
-
+        /// <summary>
+        /// Данные для предзаполнения сущности Клиент
+        /// </summary>
         public static IEnumerable<Customer> Customers
         {
             get
