@@ -3,7 +3,9 @@ using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.WebHost.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace PromoCodeFactory.WebHost.Controllers
@@ -32,11 +34,17 @@ namespace PromoCodeFactory.WebHost.Controllers
             _promoCodeRepository = promoCodeRepository;
         }
 
+        /// <summary>
+        /// Получить список всех клиентов
+        /// </summary>
+        /// <returns> Возвращает список всех клиентов - объектов типа CustomerShortResponse </returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">При запросе к БД произошла ошибка</response>
         [HttpGet]
+        [ProducesResponseType(typeof(List<CustomerShortResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<CustomerShortResponse>> GetCustomersAsync()
         {
-            //TODO: Добавить получение списка клиентов
-
             try
             {
                 var customerList = (await _customerRepository.GetAllAsync()).ToList();
@@ -58,10 +66,18 @@ namespace PromoCodeFactory.WebHost.Controllers
             }
         }
 
+        /// <summary>
+        /// Получить клиента по Id
+        /// </summary>
+        /// <param name="id">Id клиента</param>
+        /// <returns>Вернёт найденого клиента - объект CustomerResponse</returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="404">Клиент с заданным Id не найден</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(EmployeeResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<CustomerResponse>> GetCustomerAsync(Guid id)
         {
-            //TODO: Добавить получение клиента вместе с выданными ему промомкодами
             var customer = (await _customerRepository.GetByIdAsync(id));
             if (customer == null)
                 return NotFound("Не найден клиент с Id " + id.ToString());
@@ -91,13 +107,23 @@ namespace PromoCodeFactory.WebHost.Controllers
                 });
         }
 
+        /// <summary>
+        /// Добавить нового клиента со списокм его предпочтений
+        /// </summary>
+        /// <param name="id">GUID клиента</param>
+        /// <returns>Вернёт строку с информацией о выполненной операцией</returns>
+        /// <response code="201">Успешное выполнение. Клиент создан</response>
+        /// <response code="400">Не удалось найти одно из предпочтений клтиента в справочнике предпочтений</response>        
         [HttpPost]
-        public async Task<IActionResult> CreateCustomerAsync(CreateOrEditCustomerRequest request)
+        [ProducesResponseType(typeof(Customer), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [HttpPost]
+        public async Task<ActionResult<Customer>> CreateCustomerAsync(CreateOrEditCustomerRequest request)
         {
-            //TODO: Добавить создание нового клиента вместе с его предпочтениями
             var customerToAdd = new Customer { Id = Guid.NewGuid(), FirstName = request.FirstName, LastName = request.LastName, Email = request.Email };
             var customerAdded = await _customerRepository.AddAsync(customerToAdd);
 
+            /// далее добавляем связки клиента с предпочтениями 
             if ((request.PreferenceIds != null) && (request.PreferenceIds.Count > 0))
             {
                 foreach (var pref in request.PreferenceIds)
@@ -117,10 +143,27 @@ namespace PromoCodeFactory.WebHost.Controllers
                     }
                 }
             }
-            return Ok("Создан клиент: " + customerAdded.FullName + " с Id: " + customerAdded.Id.ToString());
+            var routVar = new UriBuilder(Request.Scheme, Request.Host.Host, (int)Request.Host.Port, Request.Path.Value).ToString() + "/" + customerAdded.Id.ToString();
+            var retVar = await _customerRepository.GetByIdAsync(customerAdded.Id);
+            return Created(routVar, retVar);
         }
 
+
+
+        /// <summary>
+        /// Обновить данные клиента
+        /// </summary>
+        /// <param name="id">Id клиента</param>
+        /// <param name="request">Данные клиента - объект EmployeeUpdateRequest</param>
+        /// <returns>Возвращает строку с описанием результата выполнения операции</returns>
+        /// <response code="200">Успешное выполнение. Данные клиента обновлены</response>
+        /// <response code="400">Одно из предпочтений клиента не найдено в справочнике предпочтений</response>
+        /// <response code="404">Не найден клиент с указаным id</response>
+        /// 
         [HttpPut("{id}")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> EditCustomersAsync(Guid id, CreateOrEditCustomerRequest request)
         {
             //TODO: Обновить данные клиента вместе с его предпочтениями
@@ -169,7 +212,18 @@ namespace PromoCodeFactory.WebHost.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Удалить клиента
+        /// </summary>
+        /// <param name="id">id удаляемого клиента</param>
+        /// <returns>Строку с описанием результата выполнения операции</returns>        
+        /// <response code="200">Успешное выполнение. Клиент удалён</response>
+        /// <response code="404">Не найден клиент с указанным id</response>
+        /// 
         [HttpDelete]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> DeleteCustomer(Guid id)
         {
             //TODO: Удаление клиента вместе с выданными ему промокодами
@@ -181,7 +235,9 @@ namespace PromoCodeFactory.WebHost.Controllers
                 return NotFound("Не найден клиент с Id = " + id.ToString());
             }
 
+            // удаляем связку с Пердпочтениями
             await _customerPreferenceRepository.DeleteByCustomerId(id);
+            // удаляем промокоды, выданые клиенту
             await _promoCodeRepository.DeletePromoCodesByCustomerIdAsync(customer.Id);
 
             var deleteFlag = await _customerRepository.DeleteAsync(id);
