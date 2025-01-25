@@ -22,9 +22,10 @@ namespace PromoCodeFactory.WebHost.Controllers
         }
 
         /// <summary>
-        /// Получить все пердпочтения
+        /// Получить список всех предпочтений
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Возвращает список всех предпочтений - объекты типа PreferenceResponse</returns>
+        /// <response code="200">Успешное выполнение</response>
         [HttpGet]
         public async Task<IEnumerable<PreferenceResponse>> GetPreferenceAsync()
         {
