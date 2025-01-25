@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc;
+using PromoCodeFactory.Core.Abstractions.Repositories;
+using PromoCodeFactory.WebHost.Models;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using PromoCodeFactory.Core.Abstractions.Repositories;
-using PromoCodeFactory.Core.Domain.Administration;
-using PromoCodeFactory.WebHost.Models;
 
 namespace PromoCodeFactory.WebHost.Controllers
 {
@@ -15,9 +14,9 @@ namespace PromoCodeFactory.WebHost.Controllers
     [Route("api/v1/[controller]")]
     public class RolesController
     {
-        private readonly IRepository<Role> _rolesRepository;
+        private readonly IRoleRepository _rolesRepository;
 
-        public RolesController(IRepository<Role> rolesRepository)
+        public RolesController(IRoleRepository rolesRepository)
         {
             _rolesRepository = rolesRepository;
         }

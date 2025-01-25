@@ -29,14 +29,8 @@ namespace PromoCodeFactory.DataAccess.Repositories
             {
                 foreach (var customerCode in customerPromoCodeList)
                 {
-                    try
-                    {
-                        await DeleteAsync(customerCode.Id);
-                        counter++;
-                    }
-                    catch
-                    {
-                    }
+                    await DeleteAsync(customerCode.Id);
+                    counter++;
                 }
             }
             return counter;

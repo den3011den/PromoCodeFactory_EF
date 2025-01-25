@@ -3,6 +3,7 @@ using PromoCodeFactory.Core.Abstractions.Repositories;
 using PromoCodeFactory.Core.Domain.PromoCodeManagement;
 using PromoCodeFactory.DataAccess.Data;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,9 +21,22 @@ namespace PromoCodeFactory.DataAccess.Repositories
             return await _db.CustomerPreference.FirstOrDefaultAsync(u => u.CustomerId == customerId && u.PreferenceId == preferenceId);
         }
 
+        public async Task<List<Guid>> GetPreferenceIdsByCustomerIdAsync(Guid customerId)
+        {
+            return _db.CustomerPreference.Where(u => u.CustomerId == customerId).Select(u => u.Id).ToList();
+        }
+
         public async Task<int> DeleteByCustomerId(Guid customerId)
         {
-            return _db.CustomerPreference.Where(u => u.CustomerId == customerId).ExecuteDelete();
+            var list = _db.CustomerPreference.Where(u => u.CustomerId == customerId);
+
+            var count = 0;
+            foreach (var it in list)
+            {
+                _db.CustomerPreference.Remove(it);
+                count++;
+            }
+            return count;
         }
     }
 }

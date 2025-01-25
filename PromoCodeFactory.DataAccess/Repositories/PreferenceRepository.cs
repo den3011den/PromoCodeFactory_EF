@@ -15,8 +15,10 @@ namespace PromoCodeFactory.DataAccess.Repositories
 
         public async Task<Preference> GetByNameAsync(string name)
         {
-            return await _db.Preference.FirstOrDefaultAsync(u => u.Name.Trim().ToLower() == name.Trim().ToLower());
+            var preference = await _db.Preference.FirstOrDefaultAsync(u => u.Name == name);
+            return preference;
         }
+
 
     }
 }

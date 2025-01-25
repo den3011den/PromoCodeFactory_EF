@@ -8,13 +8,14 @@ namespace PromoCodeFactory.DataAccess.Repositories
 {
     public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
     {
-        public EmployeeRepository(ApplicationDbContext _db, IPromoCodeRepository promoCodeRepository) : base(_db)
+        public EmployeeRepository(ApplicationDbContext _db) : base(_db)
         {
         }
 
         public async Task<Employee> FindByFullnameAsync(string fullname)
         {
-            return await _db.Employee.FirstOrDefaultAsync(u => u.FullName.Trim().ToLower() == fullname.Trim().ToLower());
+            var employee = await _db.Employee.FirstOrDefaultAsync(u => (u.FirstName + " " + u.LastName) == fullname);
+            return employee;
         }
     }
 }

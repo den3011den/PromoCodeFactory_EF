@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using PromoCodeFactory.Core.Abstractions.Repositories;
+using PromoCodeFactory.WebHost.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using PromoCodeFactory.Core.Abstractions.Repositories;
-using PromoCodeFactory.Core.Domain.Administration;
-using PromoCodeFactory.WebHost.Models;
 
 namespace PromoCodeFactory.WebHost.Controllers
 {
@@ -17,9 +16,9 @@ namespace PromoCodeFactory.WebHost.Controllers
     public class EmployeesController
         : ControllerBase
     {
-        private readonly IRepository<Employee> _employeeRepository;
+        private readonly IEmployeeRepository _employeeRepository;
 
-        public EmployeesController(IRepository<Employee> employeeRepository)
+        public EmployeesController(IEmployeeRepository employeeRepository)
         {
             _employeeRepository = employeeRepository;
         }
@@ -54,7 +53,7 @@ namespace PromoCodeFactory.WebHost.Controllers
             var employee = await _employeeRepository.GetByIdAsync(id);
 
             if (employee == null)
-                return NotFound();
+                return NotFound("Не найден сотрудник с Id " + id.ToString());
 
             var employeeModel = new EmployeeResponse()
             {
@@ -62,6 +61,7 @@ namespace PromoCodeFactory.WebHost.Controllers
                 Email = employee.Email,
                 Role = new RoleItemResponse()
                 {
+                    Id = employee.Role.Id,
                     Name = employee.Role.Name,
                     Description = employee.Role.Description
                 },

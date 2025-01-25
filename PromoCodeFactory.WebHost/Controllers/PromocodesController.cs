@@ -37,10 +37,10 @@ namespace PromoCodeFactory.WebHost.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<List<PromoCodeShortResponse>>> GetPromocodesAsync()
+        public async Task<ActionResult<IEnumerable<PromoCodeShortResponse>>> GetPromocodesAsync()
         {
             //TODO: Получить все промокоды 
-            var promocodeList = (await _promoCodeRepository.GetAllAsync()).ToList();
+            var promocodeList = await _promoCodeRepository.GetAllAsync();
 
             var promoCodeShortResponseList = promocodeList.Select(u =>
                 new PromoCodeShortResponse()
@@ -53,7 +53,7 @@ namespace PromoCodeFactory.WebHost.Controllers
                     PartnerName = u.PartnerName
                 }).ToList();
 
-            return Ok(promocodeList);
+            return Ok(promoCodeShortResponseList);
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace PromoCodeFactory.WebHost.Controllers
         {
             //TODO: Создать промокод и выдать его клиентам с указанным предпочтением
 
-            var promoCodeExist = _promoCodeRepository.GetByCodeAsync(request.PromoCode);
+            var promoCodeExist = await _promoCodeRepository.GetByCodeAsync(request.PromoCode);
             if (promoCodeExist != null)
             {
                 return BadRequest("!!! Промокод с кодом \"" + request.PromoCode + "\" уже есть в базе");

@@ -30,10 +30,13 @@ namespace PromoCodeFactory.WebHost
             services.AddControllers();
             //services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+            services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IEmployeeRepository, EmployeeRepository>();
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<IPromoCodeRepository, PromoCodeRepository>();
             services.AddScoped<IPreferenceRepository, PreferenceRepository>();
             services.AddScoped<ICustomerPreferenceRepository, CustomerPreferenceRepository>();
+
 
             //services.AddScoped(typeof(IRepository<Role>), (x) =>
             //    new InMemoryRepository<Role>(FakeDataFactory.Roles));

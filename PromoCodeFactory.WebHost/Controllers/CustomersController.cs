@@ -20,13 +20,16 @@ namespace PromoCodeFactory.WebHost.Controllers
         private readonly ICustomerRepository _customerRepository;
         private readonly IPreferenceRepository _preferenceRepository;
         private readonly ICustomerPreferenceRepository _customerPreferenceRepository;
+        private readonly IPromoCodeRepository _promoCodeRepository;
 
         public CustomersController(ICustomerRepository customerRepository, IPreferenceRepository preferenceRepository,
-                ICustomerPreferenceRepository customerPreferenceRepository)
+                ICustomerPreferenceRepository customerPreferenceRepository,
+                IPromoCodeRepository promoCodeRepository)
         {
             _customerRepository = customerRepository;
             _preferenceRepository = preferenceRepository;
             _customerPreferenceRepository = customerPreferenceRepository;
+            _promoCodeRepository = promoCodeRepository;
         }
 
         [HttpGet]
@@ -59,38 +62,33 @@ namespace PromoCodeFactory.WebHost.Controllers
         public async Task<ActionResult<CustomerResponse>> GetCustomerAsync(Guid id)
         {
             //TODO: Добавить получение клиента вместе с выданными ему промомкодами
-            try
-            {
-                var customer = (await _customerRepository.GetByIdAsync(id));
-                return Ok(
-                    new CustomerResponse()
-                    {
-                        Id = customer.Id,
-                        FirstName = customer.FirstName,
-                        LastName = customer.LastName,
-                        Email = customer.Email,
-                        Preferences = customer.CustomerPreferences.Select(u =>
-                            new PreferenceResponse()
-                            {
-                                Id = u.Id,
-                                Name = u.Preference.Name
-                            }).ToList(),
-                        PromoCodes = customer.PromoCodes.Select(u =>
-                            new PromoCodeShortResponse
-                            {
-                                Id = u.Id,
-                                Code = u.Code,
-                                ServiceInfo = u.ServiceInfo,
-                                BeginDate = u.ToString(),
-                                EndDate = u.EndDate.ToString(),
-                                PartnerName = u.PartnerName
-                            }).ToList()
-                    });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var customer = (await _customerRepository.GetByIdAsync(id));
+            if (customer == null)
+                return NotFound("Не найден клиент с Id " + id.ToString());
+            return Ok(
+                new CustomerResponse()
+                {
+                    Id = customer.Id,
+                    FirstName = customer.FirstName,
+                    LastName = customer.LastName,
+                    Email = customer.Email,
+                    Preferences = customer.CustomerPreferences.Select(u =>
+                        new PreferenceResponse()
+                        {
+                            Id = u.Id,
+                            Name = u.Preference.Name
+                        }).ToList(),
+                    PromoCodes = customer.PromoCodes.Select(u =>
+                        new PromoCodeShortResponse
+                        {
+                            Id = u.Id,
+                            Code = u.Code,
+                            ServiceInfo = u.ServiceInfo,
+                            BeginDate = u.BeginDate.ToString(),
+                            EndDate = u.EndDate.ToString(),
+                            PartnerName = u.PartnerName
+                        }).ToList()
+                });
         }
 
         [HttpPost]
@@ -114,19 +112,30 @@ namespace PromoCodeFactory.WebHost.Controllers
                                     await _customerPreferenceRepository.AddAsync(new CustomerPreference { Id = Guid.NewGuid(), CustomerId = customerAdded.Id, PreferenceId = pref });
                             }
                         }
+                        else
+                            return BadRequest("Предпочтение с Id " + pref.ToString() + " не найдено в справочнике предпочтений");
                     }
                 }
             }
             return Ok("Создан клиент: " + customerAdded.FullName + " с Id: " + customerAdded.Id.ToString());
         }
 
-        [HttpPut]
-        public async Task<IActionResult> EditCustomersAsync(CreateOrEditCustomerRequest request)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> EditCustomersAsync(Guid id, CreateOrEditCustomerRequest request)
         {
             //TODO: Обновить данные клиента вместе с его предпочтениями
-            var customerToUpdate = await _customerRepository.FindByFirstnameAndLastnameAsync(request.FirstName, request.LastName);
+            var customerToUpdate = await _customerRepository.GetByIdAsync(id);
             if (customerToUpdate != null)
             {
+                foreach (var preferenceId in request.PreferenceIds)
+                {
+                    var foundPreference = await _preferenceRepository.GetByIdAsync(preferenceId);
+                    if (foundPreference == null)
+                    {
+                        return BadRequest("Предпочтение с Id " + preferenceId.ToString() + " не найдено в справочнике предпочтений");
+                    }
+                }
+
                 await _customerPreferenceRepository.DeleteByCustomerId(customerToUpdate.Id);
 
                 customerToUpdate.FirstName = request.FirstName;
@@ -164,15 +173,25 @@ namespace PromoCodeFactory.WebHost.Controllers
         public async Task<IActionResult> DeleteCustomer(Guid id)
         {
             //TODO: Удаление клиента вместе с выданными ему промокодами
-            var count = await _customerRepository.DeleteAsync(id);
-            if (count)
+
+            var customer = await _customerRepository.GetByIdAsync(id);
+
+            if (customer == null)
             {
-                return Ok("Удален клиент с Id: " + id.ToString());
+                return NotFound("Не найден клиент с Id = " + id.ToString());
             }
-            else
+
+            await _customerPreferenceRepository.DeleteByCustomerId(id);
+            await _promoCodeRepository.DeletePromoCodesByCustomerIdAsync(customer.Id);
+
+            var deleteFlag = await _customerRepository.DeleteAsync(id);
+
+            if (!deleteFlag)
             {
                 return BadRequest("Не удалена запись");
             }
+            return Ok("Удален клиент с Id: " + id.ToString());
         }
     }
+
 }

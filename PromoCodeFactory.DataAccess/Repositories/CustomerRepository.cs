@@ -30,19 +30,6 @@ namespace PromoCodeFactory.DataAccess.Repositories
             return null;
         }
 
-        public override async Task<bool> DeleteAsync(Guid id)
-        {
-            var customerToDelete = await GetByIdAsync(id);
-            if (customerToDelete != null)
-            {
-                await _promoCodeRepository.DeletePromoCodesByCustomerIdAsync(id);
-                await DeleteAsync(id);
-                return true;
-            }
-
-            return false;
-        }
-
         public async Task<Customer> FindByFirstnameAndLastnameAsync(string Firstname, string Lastname)
         {
             return await _db.Customer.FirstOrDefaultAsync(u => u.FirstName.Trim().ToLower() == Firstname.Trim().ToLower() && u.LastName.Trim().ToLower() == Lastname.Trim().ToLower());
@@ -59,9 +46,9 @@ namespace PromoCodeFactory.DataAccess.Repositories
                 if (customerIds.Count() > 1)
                 {
                     int itemsCount = customerIds.Count();
-                    customIdIndex = new Random().Next(0, itemsCount - 1);
+                    customIdIndex = new Random().Next(itemsCount);
                 }
-                return await _db.Customer.FirstOrDefaultAsync(u => u.Id == customerIds.ElementAt(0));
+                return await _db.Customer.FirstOrDefaultAsync(u => u.Id == customerIds.ElementAt(customIdIndex));
             }
             return null;
         }
