@@ -108,7 +108,7 @@ namespace PromoCodeFactory.WebHost.Controllers
         }
 
         /// <summary>
-        /// Добавить нового клиента со списокм его предпочтений
+        /// Добавить нового клиента со списком его предпочтений
         /// </summary>
         /// <param name="request">Данные о новом клиенте - объект типа CreateOrEditCustomerRequest</param>
         /// <returns>Вернёт строку с информацией о выполненной операцией</returns>
