@@ -4,6 +4,7 @@ using PromoCodeFactory.WebHost.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace PromoCodeFactory.WebHost.Controllers
@@ -24,10 +25,12 @@ namespace PromoCodeFactory.WebHost.Controllers
         }
 
         /// <summary>
-        /// Получить данные всех сотрудников
+        /// Получение списка всех сотрудников
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Возвращает список всех сотрудников - объектов типа EmployeeShortResponse</returns>
+        /// <response code="200">Успешное выполнение</response>
         [HttpGet]
+        [ProducesResponseType(typeof(List<EmployeeShortResponse>), (int)HttpStatusCode.OK)]
         public async Task<List<EmployeeShortResponse>> GetEmployeesAsync()
         {
             var employees = await _employeeRepository.GetAllAsync();
@@ -44,10 +47,15 @@ namespace PromoCodeFactory.WebHost.Controllers
         }
 
         /// <summary>
-        /// Получить данные сотрудника по id
+        /// Получить сотрудника по его id
         /// </summary>
-        /// <returns></returns>
+        /// <param name="id">Id сотрудника</param>
+        /// <returns>Вернёт найденого сотрудника - объект EmployeeResponse</returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="404">Сотрудник с заданным id не найден</response>
         [HttpGet("{id:guid}")]
+        [ProducesResponseType(typeof(EmployeeResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<EmployeeResponse>> GetEmployeeByIdAsync(Guid id)
         {
             var employee = await _employeeRepository.GetByIdAsync(id);
